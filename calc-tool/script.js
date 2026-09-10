@@ -55,3 +55,46 @@ console.log('清洗后：', clean);
 console.table(result);
 console.log('平均绩点：', calcGpa(result));
 console.log('不及格：', failed(clean));
+
+// ============================================================
+// 第三步：等级分布与格式化输出
+// ============================================================
+
+// 成绩 -> 等级：A(>=90) B(>=80) C(>=70) D(>=60) F(<60)
+const toGrade = (score) => {
+    if (score >= 90) return 'A';
+    if (score >= 80) return 'B';
+    if (score >= 70) return 'C';
+    if (score >= 60) return 'D';
+    return 'F';
+};
+
+// 各等级人数统计：返回 { A: n, B: n, C: n, D: n, F: n }
+const gradeCount = (list) => {
+    const result = { A: 0, B: 0, C: 0, D: 0, F: 0 };
+    list.forEach(s => { result[toGrade(s.score)]++; });
+    return result;
+};
+
+// 格式化报告：汇总成一段完整文字
+const report = (list) => {
+    const valid = cleanScores(list);          // 先清洗
+    if (valid.length === 0) {
+        return '没有有效成绩';
+    }
+    const detail = withPoint(valid);          // 带绩点的明细
+    const dist = gradeCount(valid);           // 等级分布
+    const failList = failed(valid);           // 不及格名单
+    const failText = failList.length > 0 ? failList.join('、') : '无';
+
+    return `有效课程${valid.length}门，平均绩点${calcGpa(detail)}；
+等级分布：A${dist.A}人 B${dist.B}人 C${dist.C}人 D${dist.D}人 F${dist.F}人；
+不及格名单：${failText}`;
+};
+
+// 用 try/catch 包住，报告生成失败时给出提示而不是让程序崩掉
+try {
+    console.log(report(scores));
+} catch (err) {
+    console.error('报告生成失败：', err.message);
+}
